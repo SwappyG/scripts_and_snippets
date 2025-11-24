@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from fastapi_server_exceptions import (
+from .fastapi_server_exceptions import (
     NotFoundException,
     StateException,
     PreemptedException,
@@ -12,14 +12,12 @@ from fastapi_server_exceptions import (
     make_json_response,
 )
 
-# These are some good exception types to have. Optional, delete if not needed
-
-
-# Add routes to the router. Move this to another file for organization
-from fastapi.routing import APIRouter
-
-router = APIRouter()
-API_PREFIX = "/api"
+from .fastapi_endpoints import (
+    router,
+    heartbeat_router,
+    API_PREFIX,
+    HEARTBEAT_ROUTER_PREFIX,
+)
 
 FASTAPI_APP_NAME = "MyFastApiApp"
 
@@ -45,6 +43,7 @@ async def _lifespan(_fastapi_app: FastAPI):
 
 app = FastAPI(title=FASTAPI_APP_NAME, lifespan=_lifespan)
 app.include_router(router, prefix=API_PREFIX)
+app.include_router(heartbeat_router, prefix=HEARTBEAT_ROUTER_PREFIX)
 
 
 app.add_middleware(
@@ -124,4 +123,3 @@ async def _preempted_exception_handler(  # pyright: ignore[reportUnusedFunction]
     _request: Request, exc: PreemptedException
 ) -> JSONResponse:
     return make_json_response(409, exc)
-
